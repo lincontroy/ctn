@@ -1,3 +1,4 @@
+FROM composer:latest AS composer
 FROM php:8.2-fpm
 
 # Installing system dependencies
@@ -13,34 +14,46 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
-    nodejs \
-    npm
+    supervisor
 
 # Installing PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Installing Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Installing Node.js and NPM
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs
+
+# Copy Composer from the builder stage
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # Setting the working directory
 WORKDIR /var/www
 
-# Copying application files
-COPY . /var/www
+# Copy composer and package files
+COPY composer.json composer.lock /var/www/
+COPY package.json package-lock.json /var/www/
 
-# Installing application dependencies (PHP and Node.js)
-RUN composer install
+# Install PHP dependencies
+RUN composer install --no-interaction --no-scripts --prefer-dist
+
+# Install Node.js dependencies
 RUN npm install
 
-# Generating the application key
-RUN php artisan key:generate
+# Copy the rest of the application code
+COPY . /var/www
+
+# Build assets for production
+# RUN npm run prod
 
 # Change permissions for the storage and cache directories
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Exposing the port
-EXPOSE 9000
+# Exposing the ports
+EXPOSE 9000 8080
 
-# Command to run both php-fpm and npm run dev in parallel
-CMD sh -c "php-fpm & npm run dev -- --host"
+# Copy Supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Command to run Supervisor
+CMD ["/usr/bin/supervisord"]
