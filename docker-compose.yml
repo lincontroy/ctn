@@ -11,6 +11,8 @@ services:
     working_dir: /var/www
     volumes:
       - .:/var/www
+      - cache_data:/var/www/storage
+      - logs_data:/var/www/bootstrap/cache
     environment:
       - DB_HOST=db
       - DB_PORT=3306
@@ -53,3 +55,5 @@ services:
 
 volumes:
   dbdata:
+  cache_data:
+  logs_data:
