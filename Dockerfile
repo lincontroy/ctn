@@ -14,13 +14,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
-    supervisor
+    supervisor \
+    default-mysql-client
 
 # Installing PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Installing Node.js and NPM
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
 # Copy Composer from the builder stage
@@ -34,26 +35,18 @@ COPY composer.json composer.lock /var/www/
 COPY package.json package-lock.json /var/www/
 
 # Install PHP dependencies
-RUN composer install --no-interaction --no-scripts --prefer-dist
-
-# Install Node.js dependencies
-RUN npm install
+RUN composer install --no-interaction --no-scripts --prefer-dist --optimize-autoloader
 
 # Copy the rest of the application code
 COPY . /var/www
 
-# Build assets for production
-# RUN npm run prod
-
-# Change permissions for the storage and cache directories
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache && \
+# Set permissions for the storage and cache directories
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
+    chown -R www-data:www-data /var/www && \
     chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Exposing the ports
-EXPOSE 9000 8080
+EXPOSE 9000 8080 8000 5173
 
 # Copy Supervisor configuration
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Command to run Supervisor
-CMD ["/usr/bin/supervisord"]
+COPY supervisord.conf /etc/supervisor/supervisord.conf

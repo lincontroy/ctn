@@ -14,18 +14,20 @@ services:
       - cache_data:/var/www/storage
       - logs_data:/var/www/bootstrap/cache
     environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=project_db
-      - DB_USERNAME=user
-      - DB_PASSWORD=password
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: project_db
+      DB_USERNAME: user
+      DB_PASSWORD: password
     ports:
       - "9000:9000"
       - "8080:8080"
+      - "8000:8000"
+      - "5173:5173"
     depends_on:
       - db
-    command: >
-      sh -c "php artisan migrate --force && php-fpm"
+    command: ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 
   db:
     image: mysql:5.7
