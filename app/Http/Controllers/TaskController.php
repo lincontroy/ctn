@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TaskController
@@ -45,16 +46,23 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'status' => 'required|in:pending,in_progress,completed',
             'due_date' => 'required|date',
         ]);
 
-        Task::create($request->all());
+        if ($validator->fails()) {
+            return Inertia::render('Tasks/Create', [
+                'errors' => $validator->errors(),
+                'old' => $request->all(),
+            ]);
+        }
 
-        return redirect()->route('tasks.index');
+        Task::create($validator->validated());
+
+        return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
 
     /**
