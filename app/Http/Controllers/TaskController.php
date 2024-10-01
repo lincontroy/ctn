@@ -107,7 +107,7 @@ class TaskController extends Controller
 
         if ($validator->fails()) {
             return Inertia::render('Tasks/Edit', [
-                'task' => $task, // передаем задачу, чтобы сохранить данные при ошибке
+                'task' => $task,
                 'errors' => $validator->errors(),
                 'old' => $request->all(),
             ]);
