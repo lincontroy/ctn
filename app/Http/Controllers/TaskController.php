@@ -98,17 +98,26 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'status' => 'required|in:pending,in_progress,completed',
             'due_date' => 'required|date',
         ]);
 
-        $task->update($request->all());
+        if ($validator->fails()) {
+            return Inertia::render('Tasks/Edit', [
+                'task' => $task,
+                'errors' => $validator->errors(),
+                'old' => $request->all(),
+            ]);
+        }
 
-        return redirect()->route('tasks.index');
+        $task->update($validator->validated());
+
+        return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
     }
+
 
     /**
      * Remove the specified task from storage.
