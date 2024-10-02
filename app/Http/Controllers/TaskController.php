@@ -134,13 +134,11 @@ class TaskController extends Controller
      *
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Exception
      */
     public function destroy(Task $task)
     {
         $task->delete();
 
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index')->with('success', 'Task deleted successfully.');
     }
 }
