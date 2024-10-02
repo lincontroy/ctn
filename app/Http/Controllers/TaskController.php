@@ -46,13 +46,15 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        // Validator
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|in:pending,in_progress,completed',
-            'due_date' => 'required|date',
+            'title' => 'required|string|max:255',  // Title (required, must be a string, no longer than 255 characters)
+            'description' => 'required|string',  // Description (required,  must be a string)
+            'status' => 'required|in:pending,in_progress,completed',  // Status (required, must be one of the defined values)
+            'due_date' => 'required|date',  // Due date (required, valid date format)
         ]);
 
+        // If validation fails, re-render the 'Create Task' page, passing the errors and old input data
         if ($validator->fails()) {
             return Inertia::render('Tasks/Create', [
                 'errors' => $validator->errors(),
@@ -60,8 +62,10 @@ class TaskController extends Controller
             ]);
         }
 
+        // If validation passes, create a new Task using the validated data
         Task::create($validator->validated());
 
+        // Redirect to the task index page with a success message
         return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
 
@@ -98,13 +102,15 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        // Validator
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|in:pending,in_progress,completed',
-            'due_date' => 'required|date',
+            'title' => 'required|string|max:255',  // Title (required, must be a string, no longer than 255 characters)
+            'description' => 'required|string',  // Description (required,  must be a string)
+            'status' => 'required|in:pending,in_progress,completed',  // Status (required, must be one of the defined values)
+            'due_date' => 'required|date',  // Due date (required, valid date format)
         ]);
 
+        // If validation fails, re-render the 'Edit Task' page, passing the task data, errors, and old input data
         if ($validator->fails()) {
             return Inertia::render('Tasks/Edit', [
                 'task' => $task,
@@ -113,8 +119,10 @@ class TaskController extends Controller
             ]);
         }
 
+        // If validation passes, update the existing task with the validated data
         $task->update($validator->validated());
 
+        // Redirect to the task index page with a success message
         return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
     }
 
