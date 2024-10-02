@@ -16,24 +16,25 @@ use Illuminate\Support\Facades\Validator;
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the tasks.
+     * Display a listing of tasks with optional status filtering.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Inertia\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::all();
-        return Inertia::render('Tasks/Index', ['tasks' => $tasks]);
-    }
+        $status = $request->input('status');
 
-    /**
-     * Show the form for creating a new task.
-     *
-     * @return \Inertia\Response
-     */
-    public function create()
-    {
-        return Inertia::render('Tasks/Create');
+        // Apply status filter if provided
+        $tasks = Task::when($status, function ($query, $status) {
+            return $query->where('status', $status);
+        })->get();
+
+        // Pass tasks and the selected filter status to the view
+        return Inertia::render('Tasks/Index', [
+            'tasks' => $tasks,
+            'selectedStatus' => $status,  // Pass selected status to the frontend
+        ]);
     }
 
     /**
