@@ -77,7 +77,9 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        return Inertia::render('Tasks/Show', ['task' => $task]);
+        return Inertia::render('Tasks/Show', [
+            'task' => $task,
+        ]);
     }
 
     /**

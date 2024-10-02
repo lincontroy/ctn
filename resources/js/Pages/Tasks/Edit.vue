@@ -60,15 +60,15 @@
   </div>
 </template>
   
-  <script>
+<script>
 import { useForm, usePage } from "@inertiajs/inertia-vue3";
 
 export default {
   props: {
-    task: Object, // Передаем задачу через props
+    task: Object,
   },
   setup(props) {
-    const { props: pageProps } = usePage(); // Получаем доступ к props через Inertia
+    const { props: pageProps } = usePage();
     const form = useForm({
       title: props.task.title || pageProps.old?.title || "",
       description: props.task.description || pageProps.old?.description || "",
