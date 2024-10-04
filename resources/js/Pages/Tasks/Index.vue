@@ -39,17 +39,15 @@
     </button>
 
     <!-- Task List -->
-    <ul>
-      <li v-for="task in tasks" :key="task.id">
+    <ul v-if="tasks.data && tasks.data.length">
+      <li v-for="task in tasks.data" :key="task.id">
         {{ task.title }} - {{ task.status }}
-        <!-- Edit button -->
         <button
           @click="editTask(task.id)"
           class="bg-yellow-500 text-white p-1 ml-2"
         >
           Edit
         </button>
-        <!-- Delete button -->
         <button
           @click="deleteTask(task.id)"
           class="bg-red-500 text-white p-1 ml-2"
@@ -58,6 +56,25 @@
         </button>
       </li>
     </ul>
+    <p v-else>No tasks available</p>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      <button
+        v-if="tasks.prev_page_url"
+        @click="navigate(tasks.prev_page_url)"
+        class="bg-gray-500 text-white p-2"
+      >
+        Previous
+      </button>
+      <button
+        v-if="tasks.next_page_url"
+        @click="navigate(tasks.next_page_url)"
+        class="bg-gray-500 text-white p-2 ml-2"
+      >
+        Next
+      </button>
+    </div>
   </div>
 </template>
 
@@ -133,6 +150,15 @@ export default {
         default:
           return "All";
       }
+    },
+
+    /**
+     * Navigate to the given URL for pagination.
+     *
+     * @param {String} url The URL to navigate to.
+     */
+    navigate(url) {
+      Inertia.visit(url);
     },
   },
 };

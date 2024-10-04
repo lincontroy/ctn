@@ -28,7 +28,7 @@ class TaskController extends Controller
         // Apply status filter if provided
         $tasks = Task::when($status, function ($query, $status) {
             return $query->where('status', $status);
-        })->get();
+        })->paginate(5);
 
         // Pass tasks and the selected filter status to the view
         return Inertia::render('Tasks/Index', [
