@@ -14,36 +14,46 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Show the form to edit the user's profile.
+     *
+     * @param Request $request
+     * @return Response
      */
-    public function edit(Request $request): Response
+    public function showEditForm(Request $request): Response
     {
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
+            'requiresEmailVerification' => $request->user() instanceof MustVerifyEmail,
+            'notificationStatus' => session('status'),
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Update the user's profile data.
+     *
+     * @param ProfileUpdateRequest $request
+     * @return RedirectResponse
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function updateProfile(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         return Redirect::route('profile.edit');
     }
 
     /**
-     * Delete the user's account.
+     * Remove the user's account from the system.
+     *
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function destroy(Request $request): RedirectResponse
+    public function deleteAccount(Request $request): RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'current_password'],
