@@ -8,145 +8,110 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Class TaskController
- * @package App\Http\Controllers
- *
- * Controller for managing tasks.
+ * Handles task management actions such as creating, updating, and deleting tasks.
  */
 class TaskController extends Controller
 {
     /**
-     * Display a listing of tasks with optional status filtering.
+     * Display tasks with optional status filtering.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return \Inertia\Response
      */
-    public function index(Request $request)
+    public function listTasks(Request $request): \Inertia\Response
     {
-        $status = $request->input('status');
+        $statusFilter = $request->input('status');
 
-        // Apply status filter if provided
-        $tasks = Task::when($status, function ($query, $status) {
-            return $query->where('status', $status);
+        $tasks = Task::when($statusFilter, function ($query, $statusFilter) {
+            return $query->where('status', $statusFilter);
         })->paginate(5);
 
-        // Pass tasks and the selected filter status to the view
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
-            'selectedStatus' => $status,  // Pass selected status to the frontend
+            'selectedStatus' => $statusFilter,
         ]);
     }
 
     /**
-     * Show the form for creating a new task.
+     * Show the form to create a new task.
      *
      * @return \Inertia\Response
      */
-    public function create()
+    public function showCreateForm(): \Inertia\Response
     {
         return Inertia::render('Tasks/Create');
     }
 
     /**
-     * Store a newly created task in storage.
+     * Store a new task in the database.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function createTask(Request $request): \Illuminate\Http\RedirectResponse
     {
-        // Validator
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',  // Title (required, must be a string, no longer than 255 characters)
-            'description' => 'required|string',  // Description (required,  must be a string)
-            'status' => 'required|in:pending,in_progress,completed',  // Status (required, must be one of the defined values)
-            'due_date' => 'required|date',  // Due date (required, valid date format)
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'status' => 'required|in:pending,in_progress,completed',
+            'due_date' => 'required|date',
         ]);
 
-        // If validation fails, re-render the 'Create Task' page, passing the errors and old input data
-        if ($validator->fails()) {
-            return Inertia::render('Tasks/Create', [
-                'errors' => $validator->errors(),
-                'old' => $request->all(),
-            ]);
-        }
+        Task::create($validatedData);
 
-        // If validation passes, create a new Task using the validated data
-        Task::create($validator->validated());
-
-        // Redirect to the task index page with a success message
         return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
 
     /**
-     * Display the specified task.
+     * Display a specific task.
      *
-     * @param  \App\Models\Task  $task
+     * @param Task $task
      * @return \Inertia\Response
      */
-    public function show(Task $task)
+    public function showTask(Task $task): \Inertia\Response
     {
-        return Inertia::render('Tasks/Show', [
-            'task' => $task,
-        ]);
+        return Inertia::render('Tasks/Show', ['task' => $task]);
     }
 
     /**
-     * Show the form for editing the specified task.
+     * Show the form to edit a task.
      *
-     * @param  \App\Models\Task  $task
+     * @param Task $task
      * @return \Inertia\Response
      */
-    public function edit(Task $task)
+    public function showEditForm(Task $task): \Inertia\Response
     {
         return Inertia::render('Tasks/Edit', ['task' => $task]);
     }
 
     /**
-     * Update the specified task in storage.
+     * Update a task in the database.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Task  $task
+     * @param Request $request
+     * @param Task $task
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(Request $request, Task $task)
+    public function updateTask(Request $request, Task $task): \Illuminate\Http\RedirectResponse
     {
-        // Validator
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',  // Title (required, must be a string, no longer than 255 characters)
-            'description' => 'required|string',  // Description (required,  must be a string)
-            'status' => 'required|in:pending,in_progress,completed',  // Status (required, must be one of the defined values)
-            'due_date' => 'required|date',  // Due date (required, valid date format)
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'status' => 'required|in:pending,in_progress,completed',
+            'due_date' => 'required|date',
         ]);
 
-        // If validation fails, re-render the 'Edit Task' page, passing the task data, errors, and old input data
-        if ($validator->fails()) {
-            return Inertia::render('Tasks/Edit', [
-                'task' => $task,
-                'errors' => $validator->errors(),
-                'old' => $request->all(),
-            ]);
-        }
+        $task->update($validatedData);
 
-        // If validation passes, update the existing task with the validated data
-        $task->update($validator->validated());
-
-        // Redirect to the task index page with a success message
         return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
     }
 
-
     /**
-     * Remove the specified task from storage.
+     * Delete a task from the database.
      *
-     * @param  \App\Models\Task  $task
+     * @param Task $task
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Task $task)
+    public function deleteTask(Task $task): \Illuminate\Http\RedirectResponse
     {
         $task->delete();
 
