@@ -1,0 +1,1 @@
+import{j as o}from"./app-DT_4Y409.js";import t from"./loanApplications-Blju26nr.js";/* empty css            */import"./index-CCgL33oX.js";import"./transition-D0D1oice.js";import"./index-Bam0Hizw.js";import"./button-DRPktjTk.js";import"./app-layout-Dm49Z596.js";import"./index-G9T5zEPV.js";function f(){return o.jsx(t,{statusFilter:"approved"})}export{f as default};

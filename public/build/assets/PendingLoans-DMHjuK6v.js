@@ -1,0 +1,1 @@
+import{j as t}from"./app-DT_4Y409.js";import o from"./loanApplications-Blju26nr.js";/* empty css            */import"./index-CCgL33oX.js";import"./transition-D0D1oice.js";import"./index-Bam0Hizw.js";import"./button-DRPktjTk.js";import"./app-layout-Dm49Z596.js";import"./index-G9T5zEPV.js";function f(){return t.jsx(o,{statusFilter:"pending"})}export{f as default};
