@@ -1,54 +1,52 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TaskController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Api\DashboardController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| This file defines the web routes for the application.
-|
-*/
-
-/**
- * Display the welcome page with basic application info.
- */
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('welcome');
+})->name('home');
+
+Route::middleware(['auth', 'verified'])->get('/dashboard-summary', [DashboardController::class, 'summary']);
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('users', function () {
+        return Inertia::render('customers');
+    })->name('customers');
 });
 
-/**
- * Display the dashboard page.
- */
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-/**
- * Group routes requiring authentication.
- */
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'showEditForm'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'deleteAccount'])->name('profile.destroy');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('tasks', function () {
+        return Inertia::render('tasks');
+    })->name('tasks');
 });
 
-/**
- * Include authentication routes.
- */
-require __DIR__ . '/auth.php';
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('loanApplications', function () {
+        return Inertia::render('loanApplications');
+    })->name('loanApplications');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('approvedApplications', function () {
+        return Inertia::render('ApprovedLoans');
+    })->name('approvedApplication');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('pendingApplications', function () {
+        return Inertia::render('PendingLoans');
+    })->name('pendingApplications');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('loanRepayments', function () {
+        return Inertia::render('LoanRepayments');
+    })->name('loanRepayments');
+});
 
-/**
- * Define resource routes for task management.
- */
-Route::resource('tasks', TaskController::class);
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
